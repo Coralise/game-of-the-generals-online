@@ -6,6 +6,12 @@ A real-time multiplayer implementation of the classic Filipino strategy board ga
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![WebRTC](https://img.shields.io/badge/WebRTC-P2P-orange?style=flat-square)
 
+## 🌐 Live Demo
+
+**Play now:** [https://gotg-online.vercel.app/](https://gotg-online.vercel.app/)
+
+Open the link in two separate browsers or devices to start a game!
+
 ## ✨ Features
 
 - **🔗 Pure Peer-to-Peer Gameplay** - Direct WebRTC connections between players, no game server required

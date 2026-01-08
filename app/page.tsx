@@ -528,7 +528,7 @@ export default function GameOfGenerals() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "rooms", filter: `join_code=eq.${newCode}` },
         async (payload) => {
-          if (payload.new.answer) {
+          if (payload.new.answer && !remoteDescriptionSet) {
             await pc.setRemoteDescription(payload.new.answer);
             remoteDescriptionSet = true;
             // Process queued candidates
