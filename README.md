@@ -55,6 +55,25 @@ This game uses **WebRTC Data Channels** to establish direct peer-to-peer connect
 - Better privacy (no game data stored on servers)
 - Scalable without backend infrastructure
 
+### ⚠️ Security & Limitations
+
+**Important Note**: Since this is a pure peer-to-peer implementation without a server-side "judge," the security model is **primitive and educational in nature**.
+
+In traditional Game of the Generals, a neutral arbiter or referee determines combat outcomes without revealing piece identities to either player. In this implementation:
+
+- **Piece information is sent directly between players** during combat
+- Players with technical knowledge could inspect network traffic or modify client code to see opponent pieces
+- There is **no server validation** of moves or combat results
+- Cheating is possible for anyone who reverse engineers the WebRTC data channel messages
+
+**This is a proof-of-concept project** demonstrating WebRTC capabilities, not a production-ready competitive game. For serious competitive play, this would require:
+- Server-side game state management
+- Authoritative server to validate all moves and resolve combat
+- Encrypted piece data until revealed
+- Anti-cheat mechanisms
+
+The current implementation prioritizes **learning WebRTC** and **code simplicity** over competitive security. Play with friends you trust! 🤝
+
 ## 🎯 Game Rules
 
 Game of the Generals is a two-player strategy game where:
