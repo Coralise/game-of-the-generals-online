@@ -17,7 +17,14 @@ const supabase = createClient(
 );
 
 const iceConfig = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    {
+      urls: "turn:free.expressturn.com:3478",
+      username: "000000002083254241",
+      credential: "LkRHw8xCA4I6k62wDw+6tuXHBEU="
+    }
+  ]
 };
 
 const pieceMap = {
