@@ -465,6 +465,10 @@ export default function GameOfGenerals() {
     const candidateQueue: RTCIceCandidate[] = [];
     let remoteDescriptionSet = false;
 
+    pc.onconnectionstatechange = () => {
+      console.log("Host connection state:", pc.connectionState);
+    };
+
     const channel = pc.createDataChannel("game");
 
     channel.onopen = () => {
@@ -576,6 +580,10 @@ export default function GameOfGenerals() {
     const candidateQueue: RTCIceCandidate[] = [];
     let remoteDescriptionSet = false;
 
+    pc.onconnectionstatechange = () => {
+      console.log("Connector connection state:", pc.connectionState);
+    };
+
     pc.ondatachannel = (event) => {
       const channel = event.channel;
 
@@ -674,6 +682,19 @@ export default function GameOfGenerals() {
         }
       )
       .subscribe();
+
+    // Fetch any existing host ICE candidates
+    const { data: existingCandidates } = await supabase
+      .from("ice_candidates")
+      .select("candidate")
+      .eq("join_code", joinCode)
+      .eq("from_peer", "host");
+
+    if (existingCandidates) {
+      for (const row of existingCandidates) {
+        await pc.addIceCandidate(new RTCIceCandidate(row.candidate));
+      }
+    }
 
     toast.success(`Joined room ${joinCode.toUpperCase()}`);
   };
