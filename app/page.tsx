@@ -621,6 +621,7 @@ export default function GameOfGenerals() {
       console.log("Connector ICE connection state:", pc.iceConnectionState);
       if (pc.iceConnectionState === "failed") {
         console.error("ICE connection failed. Try refreshing both browsers.");
+        toast.dismiss('connecting');
         toast.error("Connection failed. Please try again.");
       }
     };
@@ -634,6 +635,8 @@ export default function GameOfGenerals() {
 
       channel.onopen = () => {
         console.log("✅ Connector DataChannel open");
+        toast.dismiss('connecting');
+        toast.success(`Connected to room ${joinCode.toUpperCase()}`);
         channel.send(JSON.stringify({ type: "PlayerName", name: "Player 2" }));
         setConnected(true);
         setSide('blue');
@@ -741,7 +744,7 @@ export default function GameOfGenerals() {
       }
     }
 
-    toast.success(`Joined room ${joinCode.toUpperCase()}`);
+    toast.loading(`Connecting to room ${joinCode.toUpperCase()}...`, { id: 'connecting' });
   };
   
   return (
