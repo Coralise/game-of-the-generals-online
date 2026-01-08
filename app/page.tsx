@@ -469,6 +469,14 @@ export default function GameOfGenerals() {
       console.log("Host connection state:", pc.connectionState);
     };
 
+    pc.oniceconnectionstatechange = () => {
+      console.log("Host ICE connection state:", pc.iceConnectionState);
+    };
+
+    pc.onicegatheringstatechange = () => {
+      console.log("Host ICE gathering state:", pc.iceGatheringState);
+    };
+
     const channel = pc.createDataChannel("game");
 
     channel.onopen = () => {
@@ -566,6 +574,24 @@ export default function GameOfGenerals() {
       )
       .subscribe();
 
+    // Fetch any existing connector ICE candidates
+    const { data: existingCandidates } = await supabase
+      .from("ice_candidates")
+      .select("candidate")
+      .eq("join_code", newCode)
+      .eq("from_peer", "connector");
+
+    if (existingCandidates) {
+      for (const row of existingCandidates) {
+        const candidate = new RTCIceCandidate(row.candidate);
+        if (remoteDescriptionSet) {
+          await pc.addIceCandidate(candidate);
+        } else {
+          candidateQueue.push(candidate);
+        }
+      }
+    }
+
     setRoomCode(newCode);
     toast.success('Room created successfully!');
   };
@@ -582,6 +608,18 @@ export default function GameOfGenerals() {
 
     pc.onconnectionstatechange = () => {
       console.log("Connector connection state:", pc.connectionState);
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      console.log("Connector ICE connection state:", pc.iceConnectionState);
+      if (pc.iceConnectionState === "failed") {
+        console.error("ICE connection failed. Try refreshing both browsers.");
+        toast.error("Connection failed. Please try again.");
+      }
+    };
+
+    pc.onicegatheringstatechange = () => {
+      console.log("Connector ICE gathering state:", pc.iceGatheringState);
     };
 
     pc.ondatachannel = (event) => {
