@@ -24,17 +24,17 @@ export default function GameBoard({ board, movePiece, side = 'red' }: Readonly<{
     const actualRow = side === 'blue' ? (rows - 1 - row) : row;
     const actualCol = side === 'blue' ? (cols - 1 - col) : col;
     
-    if (!selectedTile) {
-      if (displayBoard?.[row]?.[col]) {
+    const clickedPiece = displayBoard?.[row]?.[col];
+    const isOwnPiece = clickedPiece?.startsWith(`${side}-`);
+    
+    if (isOwnPiece) {
+      if (selectedTile?.row === actualRow && selectedTile?.col === actualCol) {
+        setSelectedTile(null);
+      } else {
         setSelectedTile({ row: actualRow, col: actualCol });
       }
-    } else if (selectedTile.row === actualRow && selectedTile.col === actualCol) {
-      setSelectedTile(null);
-    } else if (baseBoard?.[selectedTile.row]?.[selectedTile.col]) {
+    } else if (selectedTile) {
       movePiece(selectedTile, { row: actualRow, col: actualCol });
-      setSelectedTile(null);
-    } else {
-      console.log("Invalid move: No piece selected");
       setSelectedTile(null);
     }
   }

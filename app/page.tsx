@@ -225,8 +225,6 @@ export default function GameOfGenerals() {
   }, [gameState]);
 
   function movePiece(from: { row: number; col: number }, to: { row: number; col: number }) {
-    console.log(`Moving piece from (${from.row}, ${from.col}) to (${to.row}, ${to.col})`);
-    
     switch (gameState) {
       case 'waiting': {
         let temp = board[to.row][to.col];
@@ -237,11 +235,11 @@ export default function GameOfGenerals() {
       }
       case 'preparing': {
         if ((side === 'red' && (to.row < 5)) || (side === 'blue' && (to.row > 2))) {
-          console.log("Invalid move: Can only move within preparing zone");
+          toast.error("Can only move within your preparing zone");
           return;
         }
         if (side === 'red' && player1Ready || side === 'blue' && player2Ready) {
-          console.log("Invalid move: Player is already ready");
+          toast.error("Can't move pieces after marking ready");
           return;
         }
         let temp = board[to.row][to.col];
@@ -253,7 +251,7 @@ export default function GameOfGenerals() {
       case 'playing': {
         // Check if it's the player's turn
         if (turn !== side) {
-          console.log("Invalid move: Not your turn");
+          toast.error("Not your turn!");
           return;
         }
 
@@ -261,7 +259,7 @@ export default function GameOfGenerals() {
         
         // Check if the piece belongs to the player
         if (!movingPiece?.startsWith(`${side}-`)) {
-          console.log("Invalid move: Not your piece");
+          toast.error("Not your piece!");
           return;
         }
         
@@ -270,7 +268,7 @@ export default function GameOfGenerals() {
         const colDiff = Math.abs(to.col - from.col);
         
         if (!((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1))) {
-          console.log("Invalid move: Can only move to adjacent spaces");
+          toast.error("Can only move to adjacent spaces");
           return;
         }
 
@@ -278,12 +276,11 @@ export default function GameOfGenerals() {
 
         if (occupyingPiece) { // Attacking
           if (occupyingPiece.startsWith(`${side}-`)) {
-            console.log("Invalid move: Cannot attack your own piece");
+            toast.error("Cannot attack your own piece");
             return;
           }
 
           const attacker = pieceMap[movingPiece.split("-")[1] as keyof typeof pieceMap];
-          console.log(`Attacker ${movingPiece} piece value: ${attacker}`);
           dataChannel?.send(JSON.stringify({
             type: "AttackPiece",
             from,
@@ -338,12 +335,9 @@ export default function GameOfGenerals() {
         channel.send(JSON.stringify({ type: "Handshake-Ack" }));
         break;
       case "Handshake-Ack":
-        console.log("Handshake complete");
         break;
       case "RequestPieces": {
-        console.log("Request for pieces received");
         const currentSide = sideRef.current;
-        console.log("My side:", currentSide);
         if (currentSide) {
           setBoard(currentBoard => {
             const myPieces = getMyPieces(currentBoard, currentSide);
@@ -354,11 +348,9 @@ export default function GameOfGenerals() {
         break;
       }
       case "RequestPieces-Reply":
-        console.log("Received opponent pieces");
         setBoard(currentBoard => combineBoards(currentBoard, data.board));
         break;
       case "MovePiece":
-        console.log("Received move piece command");
         setBoard(currentBoard => {
           const newBoard = currentBoard.map(row => [...row]);
           newBoard[data.to.row][data.to.col] = newBoard[data.from.row][data.from.col];
@@ -368,8 +360,6 @@ export default function GameOfGenerals() {
         setTurn(currentTurn => currentTurn === 'red' ? 'blue' : 'red');
         break;
       case "AttackPiece": {
-        console.log("Received attack piece command");
-        
         const attacker = data.attacker;
         let result: "both" | "attacker" | "defender" | null = null;
 
@@ -377,9 +367,6 @@ export default function GameOfGenerals() {
         const currentBoard = boardRef.current;
         const defenderPiece = currentBoard[data.to.row][data.to.col];
         const defender = pieceMap[defenderPiece?.split("-")[1] as keyof typeof pieceMap];
-
-        console.log(`Defender ${defenderPiece} piece value: ${defender}`);
-        console.log(`Attacker: ${attacker}, Defender: ${defender}`);
         
         // Calculate result based on current board state
         if (attacker === defender) {
@@ -433,8 +420,6 @@ export default function GameOfGenerals() {
         break;
       }
       case "AttackResult": {
-        console.log("Received attack result");
-        console.log(`Result: ${data.result}`);
         const currentBoard = boardRef.current;
         const newBoard = currentBoard.map(row => [...row]);
         if (data.result === "both") {
@@ -452,7 +437,6 @@ export default function GameOfGenerals() {
         break;
       }
       case "GameOver": {
-        console.log("Game over received");
         setGameState('ended');
         setWinner(data.winner);
         break;
@@ -462,7 +446,7 @@ export default function GameOfGenerals() {
 
   const handleCreateRoom = async () => {
     if (peerConnection) {
-      console.log("Room already created");
+      toast.warning("Room already created");
       return;
     }
 
@@ -605,7 +589,7 @@ export default function GameOfGenerals() {
 
   const handleJoinRoom = async (joinCode: string) => {
     if (peerConnection) {
-      console.log("Already connected to a room");
+      toast.warning("Already connected to a room");
       return;
     }
 
@@ -620,7 +604,6 @@ export default function GameOfGenerals() {
     pc.oniceconnectionstatechange = () => {
       console.log("Connector ICE connection state:", pc.iceConnectionState);
       if (pc.iceConnectionState === "failed") {
-        console.error("ICE connection failed. Try refreshing both browsers.");
         toast.dismiss('connecting');
         toast.error("Connection failed. Please try again.");
       }
